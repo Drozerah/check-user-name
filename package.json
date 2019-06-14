@@ -1,0 +1,25 @@
+{
+  "name": "check-user-name",
+  "version": "1.0.0",
+  "description": "Check if a user name exists on multiple APIs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Thomas G. aka Drozerah",
+    "email": "drozerah@gmail.com",
+    "url": "https://github.com/Drozerah"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Drozerah/check-user-name.git"
+  },
+  "dependencies": {
+    "async": "^3.0.1",
+    "chalk": "^2.4.2",
+    "ora": "^3.4.0"
+  },
+  "license": "ISC"
+}
