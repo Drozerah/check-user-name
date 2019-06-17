@@ -7,7 +7,7 @@ const https = require('https')
 const events = require('events')
 const util = require('util')
 const Ora = require('ora')
-const {blue, red} = require('chalk')
+const {blue, red, green} = require('chalk')
 
 /**
  * App modules
@@ -28,9 +28,8 @@ const Spinner = () => new Ora({
 			"Checking ···▫"
         ],
         interval: 90
-      }
+    }
 })
-
 
 // declare new spinner instance
 const Spin = Spinner()
@@ -45,11 +44,21 @@ const [,,userNameCMD] = process.argv
 // if userNameCMD is undefined use default 'john_doe' as userName
 const userName = userNameCMD || 'john_doe'
 
+/**
+ * Declare variables, classes...
+ */
+
 // declare async.parallel() Object first argument 
 const tasks = {}
 
 // declare request counter
 let requestCounter = 0
+
+// declare result object
+const resultsArray = []
+
+// declare a new class that extend the events class
+class EventEmitter extends events{}
 
 // populate the tasks collection Object with data from ./data/site.json using forEach method 
 json.forEach((obj, idx) => {
@@ -98,8 +107,8 @@ json.forEach((obj, idx) => {
 })
 
 
-// declare run() function
-function Run(obj){
+// declare Run function
+function Run(tasks){
 
     // lauch timer
     console.time(blue('Checking Duration'))
@@ -109,58 +118,84 @@ function Run(obj){
      * we use the async.parallel partern @{doc} \> https://caolan.github.io/async/v3/docs.html#parallel
      * "Run the tasks collection of functions in parallel, without waiting until the previous function has completed"
      */
-    async.parallel(obj, (error, results) => {
+    async.parallel(tasks, (error, results) => {
     
         // stop spinner
         Spin.stop()
 
         // error message
-        console.log(`err: ${error}`)
-        console.log('-------------------------')
-
+        if (error) console.log(`err: ${error}`)
+  
         /**
          * RESULTS
          */
-        console.log(results)
+        // instanciate a new Emitter
+        const resultEvent = new EventEmitter
 
-        console.log('-------------------------\n')
-        // print default user name message
-        if (!userNameCMD) {     
-            console.log(red(`! Default user name is: ${userName}\n>> please provide a user name\n>> run 'npm run start myUserName'`));
-        }
-        // stop timer
-        console.timeEnd(blue('Checking Duration'))
-        // print analytic
-        console.log('GET request counter:',requestCounter)
-        console.log('json length:',json.length)
-        console.log('results length:',Object.keys(results).length)
-        Spin.succeed(`Done: ${percent(requestCounter,Object.keys(results).length).toFixed()} %`)
-        // return messages
-        Spin.succeed('Thank you! Hope to see you next time!')
-        Spin.succeed('Coded by Drozerah https://github.com/Drozerah')
-        // Ends node.js process 
-        process.exit()
+        // WORKING WITH RESULTS DATA
+        // add listener to resultEvent
+        resultEvent.addListener("resultEvent", (data) => {
+
+                resultsArray.push(data)
+
+                workingWithResults(resultsArray)
+
+        }).emit('resultEvent', results)// emit the 'results' event & passing arguments to listerner
     })
 }
 
-// create a Run class that inherits the events.EventEmitter class
-util.inherits(Run, events.EventEmitter)
+// Run inherits from the EventEmitter class
+util.inherits(Run, EventEmitter)
 
-// suscribe to a new event
-const run = new Run(tasks)
+// instanciate new event Emitter
+const runEvent = new Run(tasks)
 
-// run APIs calls
-run.on("runEvent", (user) => {
+// add listener to runEvent
+runEvent.addListener("runEvent", (user) => {
 
-    // messages
-    console.log('Start!')
-    console.log(`Checking user name in progress for: ${user}`)
-    console.log('Please wait until checking ends!')
+    // print start message
+    const startMsg = `Start!\nChecking user name in progress for: ${user}\nPlease wait until checking ends!`
+    console.log(green(startMsg))
+
     // start spinner
-    Spin.start()
-})
+    Spin.start() 
 
-// emit runEvent + passing in userName param
-run.emit("runEvent", userName)
+}).emit("runEvent", userName) // emit runEvent + passing in userName param
+    
 
+// formate percentage
 const percent = (cur, total) => (cur / total) * 100
+
+/**
+ * WORKING WITH RESULTS
+ */
+const workingWithResults = (data) => {
+
+    console.log('-------------------------')
+
+    // print results
+    console.log(data)
+
+    console.log('-------------------------\n')
+
+    // print default user name message
+    if (!userNameCMD) { 
+
+        console.log(red(`! Default user name is: ${userName}\n>> please provide a user name\n>> run 'npm run start myUserName'`));
+    }
+    // stop timer
+    console.timeEnd(blue('Checking Duration'))
+
+    // print analytic
+    const analytic = `GET request counter: ${requestCounter}\njson length: ${json.length}\nresults length: ${Object.keys(resultsArray[0]).length}`
+    console.log(analytic)
+
+    // update spinner
+    Spin.succeed(`Done: ${percent(requestCounter,Object.keys(resultsArray[0]).length).toFixed()} %`)
+    // return messages
+    Spin.succeed('Thank you! Hope to see you next time!')
+    Spin.succeed('Coded by Drozerah https://github.com/Drozerah')
+
+    // Ends node.js process 
+    process.exit()
+}
