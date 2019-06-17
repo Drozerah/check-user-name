@@ -7,7 +7,7 @@ const https = require('https')
 const events = require('events')
 const util = require('util')
 const Ora = require('ora')
-const {blue} = require('chalk')
+const {blue, red} = require('chalk')
 
 /**
  * App modules
@@ -31,6 +31,7 @@ const Spinner = () => new Ora({
       }
 })
 
+
 // declare new spinner instance
 const Spin = Spinner()
 
@@ -38,7 +39,11 @@ const Spin = Spinner()
  * USER NAME TO CHECK
  */
 
-const userName = 'john_doe'
+// get process.argv userName 
+const [,,userNameCMD] = process.argv
+
+// if userNameCMD is undefined use default 'john_doe' as userName
+const userName = userNameCMD || 'john_doe'
 
 // declare async.parallel() Object first argument 
 const tasks = {}
@@ -119,6 +124,10 @@ function Run(obj){
         console.log(results)
 
         console.log('-------------------------\n')
+        // print default user name message
+        if (!userNameCMD) {     
+            console.log(red(`! Default user name is: ${userName}\n>> please provide a user name\n>> run 'npm run start myUserName'`));
+        }
         // stop timer
         console.timeEnd(blue('Checking Duration'))
         // print analytic
@@ -142,6 +151,7 @@ const run = new Run(tasks)
 
 // run APIs calls
 run.on("runEvent", (user) => {
+
     // messages
     console.log('Start!')
     console.log(`Checking user name in progress for: ${user}`)
