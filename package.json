@@ -1,6 +1,6 @@
 {
   "name": "check-user-name",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Check if a user name exists on multiple APIs",
   "main": "index.js",
   "scripts": {
