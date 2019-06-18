@@ -79,7 +79,7 @@ json.forEach((obj, idx) => {
          * REQUEST APIs
          * make a get request to a given url with a given user name
          */
-        https.get( result.url + result.userName, (response) => {
+        const req = https.get( result.url + result.userName, (response) => {
     
             // update spinner text content
             Spin.text = `| ${percent(requestCounter, json.length).toFixed()} % | ${obj.name}`
@@ -88,20 +88,22 @@ json.forEach((obj, idx) => {
             // upate result Oject
             result.statusCode = response.statusCode
             result.mainProcessId = process.pid
-    
+
             // send result to last callback
             callback(null, result)
 
-        
-        }).on("error", (err) => { // an error occurs into the silence!
+        })
+        req.on("error", (err) => { // an error occurs into the silence!
     
-            // upate result Oject
-            result.statusCode = err.code
-            result.mainProcessId = process.pid
-            // update resquestCounter
-            requestCounter++
-    
-            callback(null, result)
+            if (err) {
+                
+                // upate result Oject
+                result.statusCode = err.code
+                result.mainProcessId = process.pid
+                // update resquestCounter
+                requestCounter++
+                callback(null, result)
+            }
         })
     }
 })
