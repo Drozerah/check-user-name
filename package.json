@@ -17,7 +17,7 @@
     "url": "https://github.com/Drozerah/check-user-name.git"
   },
   "dependencies": {
-    "async": "^3.0.1",
+    "async": "^3.2.2",
     "chalk": "^2.4.2",
     "ora": "^3.4.0"
   },
